@@ -1,0 +1,110 @@
+[
+    {
+        "tabela": "Alunos",
+        "esquema": "dbo",
+        "parametros": [
+            {
+                "AlunoID": 1,
+                "Nome": "Jo\u00e3o",
+                "Idade": 20,
+                "Sexo": "Masculino"
+            },
+            {
+                "AlunoID": 2,
+                "Nome": "Maria",
+                "Idade": 22,
+                "Sexo": "Feminino"
+            },
+            {
+                "AlunoID": 3,
+                "Nome": "Carlos",
+                "Idade": 21,
+                "Sexo": "Masculino"
+            },
+            {
+                "AlunoID": 4,
+                "Nome": "Ana",
+                "Idade": 23,
+                "Sexo": "Feminino"
+            }
+        ]
+    },
+    {
+        "tabela": "AlunosTurmas",
+        "esquema": "dbo",
+        "parametros": [
+            {
+                "AlunoID": 1,
+                "TurmaID": 1
+            },
+            {
+                "AlunoID": 2,
+                "TurmaID": 2
+            },
+            {
+                "AlunoID": 3,
+                "TurmaID": 3
+            },
+            {
+                "AlunoID": 4,
+                "TurmaID": 4
+            },
+            {
+                "AlunoID": 1,
+                "TurmaID": 2
+            },
+            {
+                "AlunoID": 2,
+                "TurmaID": 3
+            }
+        ]
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "parametros": [
+            {
+                "MateriaID": 1,
+                "Nome": "Matem\u00e1tica",
+                "TurmasTurmaID": 1,
+                "TurmasNome": "Turma A"
+            },
+            {
+                "MateriaID": 1,
+                "Nome": "Matem\u00e1tica",
+                "TurmasTurmaID": 5,
+                "TurmasNome": "Turma B"
+            },
+            {
+                "MateriaID": 1,
+                "Nome": "Matem\u00e1tica",
+                "TurmasTurmaID": 6,
+                "TurmasNome": "Especial"
+            },
+            {
+                "MateriaID": 2,
+                "Nome": "Hist\u00f3ria",
+                "TurmasTurmaID": 2,
+                "TurmasNome": "Turma B"
+            },
+            {
+                "MateriaID": 3,
+                "Nome": "Ci\u00eancias",
+                "TurmasTurmaID": 3,
+                "TurmasNome": "Turma C"
+            },
+            {
+                "MateriaID": 3,
+                "Nome": "Ci\u00eancias",
+                "TurmasTurmaID": 7,
+                "TurmasNome": "Turma D"
+            },
+            {
+                "MateriaID": 4,
+                "Nome": "Ingl\u00eas",
+                "TurmasTurmaID": 4,
+                "TurmasNome": "Turma D"
+            }
+        ]
+    }
+]

@@ -1,0 +1,57 @@
+[
+    {
+        "tabela": "Alunos",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Alunos { AlunoID: \"1\", Nome: \"Jo\u00e3o\", Idade: \"20\", Sexo: \"Masculino\" });"
+    },
+    {
+        "tabela": "Alunos",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Alunos { AlunoID: \"2\", Nome: \"Maria\", Idade: \"22\", Sexo: \"Feminino\" });"
+    },
+    {
+        "tabela": "Alunos",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Alunos { AlunoID: \"3\", Nome: \"Carlos\", Idade: \"21\", Sexo: \"Masculino\" });"
+    },
+    {
+        "tabela": "Alunos",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Alunos { AlunoID: \"4\", Nome: \"Ana\", Idade: \"23\", Sexo: \"Feminino\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"1\", Nome: \"Matem\u00e1tica\", TurmasTurmaID: \"1\", TurmasNome: \"Turma A\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"1\", Nome: \"Matem\u00e1tica\", TurmasTurmaID: \"5\", TurmasNome: \"Turma B\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"1\", Nome: \"Matem\u00e1tica\", TurmasTurmaID: \"6\", TurmasNome: \"Especial\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"2\", Nome: \"Hist\u00f3ria\", TurmasTurmaID: \"2\", TurmasNome: \"Turma B\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"3\", Nome: \"Ci\u00eancias\", TurmasTurmaID: \"3\", TurmasNome: \"Turma C\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"3\", Nome: \"Ci\u00eancias\", TurmasTurmaID: \"7\", TurmasNome: \"Turma D\" });"
+    },
+    {
+        "tabela": "Materias",
+        "esquema": "dbo",
+        "cypher": "CREATE (:Materias { MateriaID: \"4\", Nome: \"Ingl\u00eas\", TurmasTurmaID: \"4\", TurmasNome: \"Turma D\" });"
+    }
+]

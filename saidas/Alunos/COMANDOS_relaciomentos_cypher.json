@@ -1,0 +1,32 @@
+[
+    {
+        "tabela_origem": "Materias",
+        "tabela_destino": "Alunos",
+        "cypher": "MATCH (a:Materias { TurmasTurmaID: '1' })\nMATCH (b:Alunos { AlunoID: '1' })\nCREATE (a)-[:PERTENCE_A]->(b);"
+    },
+    {
+        "tabela_origem": "Materias",
+        "tabela_destino": "Alunos",
+        "cypher": "MATCH (a:Materias { TurmasTurmaID: '2' })\nMATCH (b:Alunos { AlunoID: '2' })\nCREATE (a)-[:PERTENCE_A]->(b);"
+    },
+    {
+        "tabela_origem": "Materias",
+        "tabela_destino": "Alunos",
+        "cypher": "MATCH (a:Materias { TurmasTurmaID: '3' })\nMATCH (b:Alunos { AlunoID: '3' })\nCREATE (a)-[:PERTENCE_A]->(b);"
+    },
+    {
+        "tabela_origem": "Materias",
+        "tabela_destino": "Alunos",
+        "cypher": "MATCH (a:Materias { TurmasTurmaID: '4' })\nMATCH (b:Alunos { AlunoID: '4' })\nCREATE (a)-[:PERTENCE_A]->(b);"
+    },
+    {
+        "tabela_origem": "Materias",
+        "tabela_destino": "Alunos",
+        "cypher": "MATCH (a:Materias { TurmasTurmaID: '2' })\nMATCH (b:Alunos { AlunoID: '1' })\nCREATE (a)-[:PERTENCE_A]->(b);"
+    },
+    {
+        "tabela_origem": "Materias",
+        "tabela_destino": "Alunos",
+        "cypher": "MATCH (a:Materias { TurmasTurmaID: '3' })\nMATCH (b:Alunos { AlunoID: '2' })\nCREATE (a)-[:PERTENCE_A]->(b);"
+    }
+]

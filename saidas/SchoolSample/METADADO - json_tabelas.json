@@ -1,0 +1,267 @@
+[
+    {
+        "nome_tabela": "Course",
+        "esquema": "dbo",
+        "chave_primaria": [
+            "CourseID"
+        ],
+        "colunas": [
+            {
+                "nome": "CourseID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "Title",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "Credits",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "DepartmentID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "OnlineCourseURL",
+                "tipo": "string",
+                "nullable": false
+            }
+        ],
+        "chaves_estrangeiras": [
+            {
+                "nome_fk": "FK_Course_Department",
+                "coluna": "DepartmentID",
+                "target": "dbo.Department.DepartmentID",
+                "tabela_referenciada": "Department",
+                "schema_referenciado": "dbo",
+                "coluna_referenciada": "DepartmentID"
+            }
+        ],
+        "aninhamento": 0,
+        "grau_relacao": 1
+    },
+    {
+        "nome_tabela": "Department",
+        "esquema": "dbo",
+        "chave_primaria": [
+            "DepartmentID"
+        ],
+        "colunas": [
+            {
+                "nome": "DepartmentID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "Name",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "Budget",
+                "tipo": "MONEY",
+                "nullable": false
+            },
+            {
+                "nome": "StartDate",
+                "tipo": "datetime",
+                "nullable": false
+            },
+            {
+                "nome": "Administrator",
+                "tipo": "int",
+                "nullable": true
+            }
+        ],
+        "chaves_estrangeiras": [],
+        "aninhamento": 0,
+        "grau_relacao": 0
+    },
+    {
+        "nome_tabela": "CourseInstructor",
+        "esquema": "dbo",
+        "chave_primaria": [
+            "CourseID",
+            "PersonID"
+        ],
+        "colunas": [
+            {
+                "nome": "CourseID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "PersonID",
+                "tipo": "int",
+                "nullable": false
+            }
+        ],
+        "chaves_estrangeiras": [
+            {
+                "nome_fk": "FK_CourseInstructor_Course",
+                "coluna": "CourseID",
+                "target": "dbo.Course.CourseID",
+                "tabela_referenciada": "Course",
+                "schema_referenciado": "dbo",
+                "coluna_referenciada": "CourseID"
+            },
+            {
+                "nome_fk": "FK_CourseInstructor_Person",
+                "coluna": "PersonID",
+                "target": "dbo.Person.PersonID",
+                "tabela_referenciada": "Person",
+                "schema_referenciado": "dbo",
+                "coluna_referenciada": "PersonID"
+            }
+        ],
+        "aninhamento": 0,
+        "grau_relacao": 2
+    },
+    {
+        "nome_tabela": "Person",
+        "esquema": "dbo",
+        "chave_primaria": [
+            "PersonID"
+        ],
+        "colunas": [
+            {
+                "nome": "PersonID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "LastName",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "FirstName",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "HireDate",
+                "tipo": "datetime",
+                "nullable": true
+            },
+            {
+                "nome": "EnrollmentDate",
+                "tipo": "datetime",
+                "nullable": true
+            },
+            {
+                "nome": "Discriminator",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "OfficeAssignmentLocation",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "OfficeAssignmentTimestamp",
+                "tipo": "TIMESTAMP",
+                "nullable": false
+            }
+        ],
+        "chaves_estrangeiras": [],
+        "aninhamento": 0,
+        "grau_relacao": 0
+    },
+    {
+        "nome_tabela": "OnsiteCourse",
+        "esquema": "dbo",
+        "chave_primaria": [
+            "CourseID"
+        ],
+        "colunas": [
+            {
+                "nome": "CourseID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "Location",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "Days",
+                "tipo": "string",
+                "nullable": false
+            },
+            {
+                "nome": "Time",
+                "tipo": "datetime",
+                "nullable": false
+            }
+        ],
+        "chaves_estrangeiras": [
+            {
+                "nome_fk": "FK_OnsiteCourse_Course",
+                "coluna": "CourseID",
+                "target": "dbo.Course.CourseID",
+                "tabela_referenciada": "Course",
+                "schema_referenciado": "dbo",
+                "coluna_referenciada": "CourseID"
+            }
+        ],
+        "aninhamento": 0,
+        "grau_relacao": 1
+    },
+    {
+        "nome_tabela": "StudentGrade",
+        "esquema": "dbo",
+        "chave_primaria": [
+            "EnrollmentID"
+        ],
+        "colunas": [
+            {
+                "nome": "EnrollmentID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "CourseID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "StudentID",
+                "tipo": "int",
+                "nullable": false
+            },
+            {
+                "nome": "Grade",
+                "tipo": "decimal",
+                "nullable": true
+            }
+        ],
+        "chaves_estrangeiras": [
+            {
+                "nome_fk": "FK_StudentGrade_Course",
+                "coluna": "CourseID",
+                "target": "dbo.Course.CourseID",
+                "tabela_referenciada": "Course",
+                "schema_referenciado": "dbo",
+                "coluna_referenciada": "CourseID"
+            },
+            {
+                "nome_fk": "FK_StudentGrade_Student",
+                "coluna": "StudentID",
+                "target": "dbo.Person.PersonID",
+                "tabela_referenciada": "Person",
+                "schema_referenciado": "dbo",
+                "coluna_referenciada": "PersonID"
+            }
+        ],
+        "aninhamento": 0,
+        "grau_relacao": 2
+    }
+]

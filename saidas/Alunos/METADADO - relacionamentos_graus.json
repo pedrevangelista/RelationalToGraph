@@ -1,0 +1,26 @@
+[
+    {
+        "nome_fk": "FK__AlunosTur__Turma__3E52440B",
+        "coluna_fk": "TurmaID",
+        "target": "dbo.Turmas.TurmaID",
+        "tabela_referenciada": "Turmas",
+        "coluna_referenciada": "TurmaID",
+        "grau_relacionamento": 0
+    },
+    {
+        "nome_fk": "FK__AlunosTur__Aluno__3D5E1FD2",
+        "coluna_fk": "AlunoID",
+        "target": "dbo.Alunos.AlunoID",
+        "tabela_referenciada": "Alunos",
+        "coluna_referenciada": "AlunoID",
+        "grau_relacionamento": 0
+    },
+    {
+        "nome_fk": "FK__Turmas__MateriaI__3B75D760",
+        "coluna_fk": "MateriaID",
+        "target": "dbo.Materias.MateriaID",
+        "tabela_referenciada": "Materias",
+        "coluna_referenciada": "MateriaID",
+        "grau_relacionamento": 1
+    }
+]
