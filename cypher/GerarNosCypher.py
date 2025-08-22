@@ -1,3 +1,4 @@
+from decimal import Decimal
 import re
 
 from utils.Geral import formatar_coluna
@@ -33,11 +34,9 @@ def gerar_nos_cypher_dados(dados_nos):
 
         nome_tabela = tabela["type"]
         esquema = tabela["scheme"]
-        propriedades = [f"{chave}={valor}" for chave, valor in tabela["properties"].items()]
-        props_dict = {
-            item.split('=')[0]: item.split('=')[1] for item in propriedades
-        }
-        props_string = ", ".join([f"{chave}: '{valor}'" for chave, valor in props_dict.items()])
+        props_string = ", ".join(
+            [f"{chave}: '{tratar_valor(valor)}'" for chave, valor in tabela["properties"].items()]
+        )
 
         cypher = f"CREATE (:{nome_tabela} {{ {props_string} }});"
 
@@ -48,3 +47,14 @@ def gerar_nos_cypher_dados(dados_nos):
         })
 
     return cypher_nos
+
+def tratar_valor(v):
+    if isinstance(v, Decimal):
+        return float(v)
+    if isinstance(v, bytes):
+        return v.hex()
+    if v is None:
+        return "None"
+    if isinstance(v, str):
+        return v.replace("'", "\\'")
+    return v

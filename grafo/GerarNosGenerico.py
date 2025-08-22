@@ -1,4 +1,34 @@
-def gerar_nos_generico(tabelas, valores_banco):
+def gerar_nos_grafo(estruturas, parametros_aninhados):
+    vertices = []
+    id_map = {}  # Mapeamento (tabela, id) -> índice no grafo
+
+    # Passo 1: Criar vértices para todas as entidades principais
+    for tabela in estruturas:
+        if tabela["aninhamento"] == 0 and tabela["tipo"] != "N:N":
+            dados_tabela = next(
+                (p for p in parametros_aninhados 
+                 if p["tabela"] == tabela["nome_tabela"] and p["esquema"] == tabela["esquema"]),
+                None
+            )
+            
+            if dados_tabela:
+                for item in dados_tabela["parametros"]:
+                    pk = tabela["chave_primaria"][0]  # Assume PK simples
+                    vertex_id = f"{tabela['nome_tabela']}:{item[pk]}"
+                    
+                    vertices.append({
+                        "id": vertex_id,
+                        "type": tabela["nome_tabela"],
+                        "scheme": tabela["esquema"],
+                        "isVertex": True,
+                        "properties": item
+                    })
+                    
+                    # Registrar no mapa de IDs
+                    id_map[(tabela["esquema"], tabela["nome_tabela"], item[pk])] = vertex_id
+    return [vertices, id_map]
+
+def gerar_nos_generico_deprecated(tabelas, valores_banco):
     nos = []
 
     for tabela in tabelas:

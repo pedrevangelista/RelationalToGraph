@@ -1,3 +1,7 @@
+from copy import deepcopy
+
+from utils.Geral import medir_tempo
+
 def tipo_simplificado(col_type):
     from sqlalchemy import (
         Integer, String, Unicode, DateTime, Boolean, Float, Numeric
@@ -17,116 +21,184 @@ def tipo_simplificado(col_type):
         return "datetime"
     else:
         return str(col_type.__class__.__name__)
-
+    
+@medir_tempo
 def obter_estruturas_relacional(metadata):
-    tabelas = metadata.tables.keys()
-    json_tabelas=[]
-    for tabela in tabelas:
-        metadata_tabela = metadata.tables[tabela]
-        partes = tabela.split('.')
-        if len(partes) == 2:
-            schema, nome_tabela = partes
-        else:
-            schema = 'dbo'  # ou outro padrão
-            nome_tabela = partes[0]
-        json_tabela = {
-            "nome_tabela": nome_tabela,
-            "esquema": schema,
-            "chave_primaria": metadata_tabela.primary_key.columns.keys(),
+    estruturas_tabelas = []
+
+    for nome_completo, tabela in metadata.tables.items():
+        
+        pk_columns = {col.name for col in tabela.primary_key.columns}
+        # Coletar restrições únicas (UNIQUE) não-PK
+        colunas_unicas = set()
+        for index in tabela.indexes:
+            if index.unique:
+                # Verificar se não é a PK
+                index_columns = {col.name for col in index.columns}
+                if index_columns != pk_columns:
+                    colunas_unicas.add(tuple(sorted(col.name for col in index.columns)))
+
+        estrutura = {
+            "nome_tabela": tabela.name,
+            "esquema": tabela.schema or "dbo",
+            "chave_primaria": [col.name for col in tabela.primary_key.columns],
             "colunas": [],
-            "chaves_estrangeiras": []
+            "chaves_estrangeiras": [],
+            "colunas_unicas": list(colunas_unicas) 
         }
 
-        # Adicione as colunas no JSON da tabela
-        for coluna in metadata_tabela.columns:
-            colunaFormatada = {
+        for coluna in tabela.columns:
+            estrutura["colunas"].append({
                 "nome": coluna.name,
                 "tipo": tipo_simplificado(coluna.type),
                 "nullable": coluna.nullable
-            }
+            })
 
-            json_tabela["colunas"].append(colunaFormatada)
+        if(len(estrutura["chave_primaria"]) == 0):
+            print(estrutura["colunas"][0])
+            estrutura["chave_primaria"] = [estrutura["colunas"][0]["nome"]]
 
-        # Obtenha as chaves estrangeiras da tabela
-        chaves_estrangeiras = metadata_tabela.foreign_keys
-        # Adicione as chaves estrangeiras para o JSON da tabela
-        for chave_estrangeira in chaves_estrangeiras:
-            json_fk = {
-                "nome_fk": chave_estrangeira.name,
-                "coluna": chave_estrangeira.parent.name,
-                "target": chave_estrangeira.target_fullname, 
-                "tabela_referenciada": chave_estrangeira.column.table.name,
-                "schema_referenciado": chave_estrangeira.column.table.schema,
-                "coluna_referenciada": chave_estrangeira.column.name
-            }
-            json_tabela["chaves_estrangeiras"].append(json_fk)
-        
-        json_tabelas.append(json_tabela)
-        
-    return json_tabelas
+        for fk_constraint in tabela.foreign_key_constraints:
+            # estrutura["chaves_estrangeiras"].append({
+            #     "nome_fk": fk.name or f"fk_{fk.parent.name}_{fk.column.table.name}",
+            #     "coluna": fk.parent.name,
+            #     "target": fk.target_fullname,
+            #     "tabela_referenciada": fk.column.table.name,
+            #     "schema_referenciado": fk.column.table.schema or "dbo",
+            #     "coluna_referenciada": fk.column.name
+            # })
+
+            colunas_locais = [col.name for col in fk_constraint.columns]
+            colunas_ref = [col.column.name for col in fk_constraint.elements]
+            tabela_ref = fk_constraint.elements[0].column.table.name
+            schema_ref = fk_constraint.elements[0].column.table.schema or "dbo"
+
+            # Verificar se é 1:1 (FK é única ou PK)
+            fk_tuple = tuple(sorted(colunas_locais))
+            is_unique = (
+                fk_tuple in estrutura["colunas_unicas"] or 
+                set(colunas_locais) == set(estrutura["chave_primaria"])
+            )
+            cardinalidade = "1:1" if is_unique else "1:N"
+
+            estrutura["chaves_estrangeiras"].append({
+                "nome_fk": fk_constraint.name,
+                "coluna_local": colunas_locais[0],
+                "tabela_referenciada": tabela_ref,
+                "schema_referenciado": schema_ref,
+                "coluna_referenciada": colunas_ref[0],
+                "cardinalidade": cardinalidade  # Adiciona a cardinalidade
+            })
+
+                # Identificar relações N:N (versão adaptada para tabelas sem PK explícita)
+        fks = estrutura["chaves_estrangeiras"]
+        if len(fks) >= 2:
+            # Se não tem PK definida mas todas colunas são FKs
+            if not estrutura["chave_primaria"]:
+                all_columns = set(col["nome"] for col in estrutura["colunas"])
+                fk_columns = set()
+                for fk in fks:
+                    fk_columns.update([fk["coluna_local"]])
+                
+                if all_columns == fk_columns:
+                    estrutura["tipo"] = "N:N"
+                    # Define PK virtual como todas colunas
+                    estrutura["chave_primaria"] = list(all_columns)
+                else:
+                    estrutura["tipo"] = "Tabela Normal"
+            else:
+                # Lógica original para tabelas com PK
+                pk_set = set(estrutura["chave_primaria"])
+                fk_columns = set()
+                for fk in fks:
+                    fk_columns.update([fk["coluna_local"]])
+                
+                if pk_set == fk_columns:
+                    estrutura["tipo"] = "N:N"
+                else:
+                    estrutura["tipo"] = "Tabela Normal"
+        else:
+            estrutura["tipo"] = "Tabela Normal"
+
+        estruturas_tabelas.append(estrutura)
+
+    return estruturas_tabelas
 
 
+@medir_tempo
 def reescrever_metadados_com_aninhamento(tabelas):
     from copy import deepcopy
 
-    # Dicionário auxiliar para acesso e modificação
+    # Criar dicionário para acesso rápido às tabelas
     tabelas_dict = {(t["esquema"], t["nome_tabela"]): deepcopy(t) for t in tabelas}
+    
+    # Identificar tabelas para aninhar (aninhamento == 1)
+    tabelas_aninhadas = []
+    
+    for chave, tabela in tabelas_dict.items():
+        if tabela.get("aninhamento") == 1:
+            # Encontrar tabela que referencia esta tabela (pai)
+            tabela_pai = None
+            
+            for chave_pai, tabela_candidata in tabelas_dict.items():
+                if chave_pai == chave:
+                    continue
+                    
+                for fk in tabela_candidata.get("chaves_estrangeiras", []):
+                    if (fk["schema_referenciado"] == tabela["esquema"] and 
+                        fk["tabela_referenciada"] == tabela["nome_tabela"]):
+                        tabela_pai = tabela_candidata
+                        coluna_fk = fk["coluna_local"]
+                        break
+                if tabela_pai:
+                    break
+                    
+            if not tabela_pai:
+                continue
 
-    # Primeira etapa: incorporar colunas das tabelas com aninhamento = 1 no pai
-    for tabela in tabelas:
-        if tabela["aninhamento"] == 1:
-            fk = tabela["chaves_estrangeiras"][0]  # assume uma FK para o pai
-            pai_key = (fk["schema_referenciado"], fk["tabela_referenciada"])
-            tabela_pai = tabelas_dict[pai_key]
-
-            # Adiciona colunas da filha ao pai (com prefixo)
+            # Adicionar colunas da tabela aninhada ao pai (prefixadas)
+            pk_aninhada = tabela["chave_primaria"][0]  # Assumindo PK simples
+            
             for col in tabela["colunas"]:
-                if col["nome"] != fk["coluna"]:
-                    nova_coluna = {
-                        "nome": f"{tabela['nome_tabela']}{col['nome']}",
-                        "tipo": col["tipo"],
-                        "nullable": col["nullable"]
-                    }
-                    tabela_pai["colunas"].append(nova_coluna)
+                # Não adicionar a coluna PK (já existe no pai como FK)
+                if col["nome"] == pk_aninhada:
+                    continue
+                    
+                nova_coluna = deepcopy(col)
+                nova_coluna["nome"] = f"{tabela['nome_tabela']}_{col['nome']}"
+                tabela_pai["colunas"].append(nova_coluna)
+                
+            # Remover a FK do pai que referenciava a tabela aninhada
+            tabela_pai["chaves_estrangeiras"] = [
+                fk for fk in tabela_pai.get("chaves_estrangeiras", [])
+                if not (fk["schema_referenciado"] == tabela["esquema"] and 
+                        fk["tabela_referenciada"] == tabela["nome_tabela"])
+            ]
+            
+            tabelas_aninhadas.append(chave)
 
-            # Adiciona a chave da filha também com prefixo
-            # pk_col = next(c for c in tabela["colunas"] if c["nome"] == fk["coluna"])
-            # nova_coluna_pk = {
-            #     "nome": f"{tabela['nome_tabela']}{pk_col['nome']}",
-            #     "tipo": pk_col["tipo"],
-            #     "nullable": pk_col["nullable"]
-            # }
-            # tabela_pai["colunas"].append(nova_coluna_pk)
+    # Remover tabelas aninhadas dos resultados
+    for chave in tabelas_aninhadas:
+        if chave in tabelas_dict:
+            del tabelas_dict[chave]
+            
+    # Atualizar campos calculados
+    for tabela in tabelas_dict.values():
+        tabela["qtd_fks"] = len(tabela.get("chaves_estrangeiras", []))
 
-    # Segunda etapa: reconstruir as tabelas com FKs redirecionadas
-    novas_tabelas = []
+        if tabela["tipo"] == "N:N" and tabela["qtd_fks"] < 2:
+            tabela["tipo"] = "Tabela Normal"
+        
+        # O grau de relacionamento precisa ser recalculado
+        tabela["grau_relacao"] = 0
+        for outra_tabela in tabelas_dict.values():
+            if outra_tabela == tabela:
+                continue
+                
+            for fk in outra_tabela.get("chaves_estrangeiras", []):
+                if (fk["schema_referenciado"] == tabela["esquema"] and 
+                    fk["tabela_referenciada"] == tabela["nome_tabela"]):
+                    tabela["grau_relacao"] += 1
+                    break  # Conta apenas uma referência por tabela
 
-    for (esquema, nome), tabela in tabelas_dict.items():
-        if tabela["aninhamento"] == 1:
-            continue  # não incluímos as tabelas aninhadas no resultado
-
-        nova_tabela = deepcopy(tabela)
-        novas_fks = []
-
-        for fk in tabela["chaves_estrangeiras"]:
-            ref_key = (fk["schema_referenciado"], fk["tabela_referenciada"])
-            tabela_ref = tabelas_dict.get(ref_key)
-            if tabela_ref and tabela_ref["aninhamento"] == 1:
-                # Redirecionar FK para o "avô" (pai da tabela aninhada)
-                fk_aninhada = tabela_ref["chaves_estrangeiras"][0]
-                novo_nome_coluna = f"{tabela_ref['nome_tabela']}{fk['coluna_referenciada']}"
-                nova_fk = {
-                    **fk,
-                    "tabela_referenciada": fk_aninhada["tabela_referenciada"],
-                    "schema_referenciado": fk_aninhada["schema_referenciado"],
-                    "coluna_referenciada": novo_nome_coluna,
-                    "target": f"{fk_aninhada['schema_referenciado']}.{fk_aninhada['tabela_referenciada']}.{novo_nome_coluna}"
-                }
-                novas_fks.append(nova_fk)
-            else:
-                novas_fks.append(fk)
-
-        nova_tabela["chaves_estrangeiras"] = novas_fks
-        novas_tabelas.append(nova_tabela)
-
-    return novas_tabelas
+    return list(tabelas_dict.values())

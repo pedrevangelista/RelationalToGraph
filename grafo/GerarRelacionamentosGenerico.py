@@ -1,7 +1,86 @@
 import json
+def gerar_arestas_generico(estruturas, parametros_aninhados, id_map):
+    arestas = []
+    for tabela in estruturas:
+        # Caso 2a: Tabelas N:N (matriz de relacionamento)
+        if tabela["tipo"] == "N:N":
+            dados_tabela = next(
+                (p for p in parametros_aninhados 
+                 if p["tabela"] == tabela["nome_tabela"] and p["esquema"] == tabela["esquema"]),
+                None
+            )
+            
+            if dados_tabela and len(tabela["chaves_estrangeiras"]) >= 2:
+                fk1, fk2 = tabela["chaves_estrangeiras"][:2]
+                
+                for item in dados_tabela["parametros"]:
+                    # Obter IDs de origem e destino
+                    from_id = id_map.get((
+                        fk1["schema_referenciado"], 
+                        fk1["tabela_referenciada"], 
+                        item[fk1["coluna_local"]]
+                    ))
+                    
+                    to_id = id_map.get((
+                        fk2["schema_referenciado"], 
+                        fk2["tabela_referenciada"], 
+                        item[fk2["coluna_local"]]
+                    ))
+                    
+                    if from_id and to_id:
+                        # Criar propriedades extras (se houver)
+                        props = {
+                            k: v for k, v in item.items()
+                            if k not in [fk1["coluna_local"], fk2["coluna_local"]]
+                        }
+                        
+                        arestas.append({
+                            "type": f"{fk1['tabela_referenciada']}_PARA_{fk2['tabela_referenciada']}",
+                            "scheme": tabela["esquema"],
+                            "isVertex": False,
+                            "from": from_id,
+                            "to": to_id,
+                            "properties": props
+                        })
 
+        # Caso 2b: Relacionamentos 1:N (via FK)
+        elif tabela["aninhamento"] == 0:
+            for fk in tabela["chaves_estrangeiras"]:
+                dados_tabela = next(
+                    (p for p in parametros_aninhados 
+                     if p["tabela"] == tabela["nome_tabela"] and p["esquema"] == tabela["esquema"]),
+                    None
+                )
+                
+                if dados_tabela:
+                    for item in dados_tabela["parametros"]:
+                        # Origem: Esta tabela (que contém a FK)
+                        pk = tabela["chave_primaria"][0]
+                        from_id = id_map.get((
+                            tabela["esquema"],
+                            tabela["nome_tabela"],
+                            item[pk]
+                        ))
+                        
+                        # Destino: Tabela referenciada
+                        to_id = id_map.get((
+                            fk["schema_referenciado"],
+                            fk["tabela_referenciada"],
+                            item[fk["coluna_local"]]
+                        ))
+                        
+                        if from_id and to_id:
+                            arestas.append({
+                                "type": fk["nome_fk"],
+                                "scheme": tabela["esquema"],
+                                "isVertex": False,
+                                "from": from_id,
+                                "to": to_id,
+                                "properties": {}
+                            })
+    return arestas
 
-def gerar_arestas_generico(tabelas, valores_banco):
+def gerar_arestas_generico_deprecated(tabelas, valores_banco):
     arestas = []
 
     for tabela in tabelas:
@@ -27,10 +106,10 @@ def gerar_arestas_generico(tabelas, valores_banco):
                     "sourceLabel": nome_tabela,
                     "targetLabel": tabela_destino,
                     "source": fk["coluna_referenciada"],
-                    "target": fk["coluna"],
+                    "target": fk["coluna_local"],
                     "properties": {
-                        fk["coluna"]: linha.get(fk["coluna"]),
-                        fk["coluna_referenciada"]: linha.get(fk["coluna"])
+                        fk["coluna_local"]: linha.get(fk["coluna_local"]),
+                        fk["coluna_referenciada"]: linha.get(fk["coluna_local"])
                     }
                 }
                 
@@ -49,12 +128,12 @@ def gerar_arestas_generico(tabelas, valores_banco):
                     "sourceLabel": tabela_a,
                     "targetLabel": tabela_b,
                     "source": fk_a["coluna_referenciada"],
-                    "target": fk_b["coluna"],
+                    "target": fk_b["coluna_local"],
                     "properties": {
-                        fk_a["coluna_referenciada"]: linha.get(fk_a["coluna"]),
-                        fk_b["coluna_referenciada"]: linha.get(fk_b["coluna"]),
-                        fk_a["coluna"]: linha.get(fk_a["coluna"]),
-                        fk_b["coluna"]: linha.get(fk_b["coluna"]),
+                        fk_a["coluna_referenciada"]: linha.get(fk_a["coluna_local"]),
+                        fk_b["coluna_referenciada"]: linha.get(fk_b["coluna_local"]),
+                        fk_a["coluna_local"]: linha.get(fk_a["coluna_local"]),
+                        fk_b["coluna_local"]: linha.get(fk_b["coluna_local"]),
                     }
                 }
                 arestas.append(aresta)
@@ -70,10 +149,10 @@ def gerar_arestas_generico(tabelas, valores_banco):
                         "sourceLabel": tabela_ref,
                         "targetLabel": nome_tabela,
                         "source": fk["coluna_referenciada"],
-                        "target": fk["coluna"],
+                        "target": fk["coluna_local"],
                         "properties": {
-                            fk["coluna"]: linha.get(fk["coluna"]),
-                            fk["coluna_referenciada"]: linha.get(fk["coluna"])
+                            fk["coluna_local"]: linha.get(fk["coluna_local"]),
+                            fk["coluna_referenciada"]: linha.get(fk["coluna_local"])
                         }
                     })
 

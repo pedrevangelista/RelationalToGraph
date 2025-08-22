@@ -1,9 +1,9 @@
-def obterInformacoesRelacionamentos(json_tabelas):
+def obterInformacoesRelacionamentos(estruturas_tabelas):
     json_relacionamentos = []
-    for tabela in json_tabelas:
+    for tabela in estruturas_tabelas:
         fks = tabela["chaves_estrangeiras"]
         for fk in fks:
-            tabelas_referenciadas = obterTabelaReferenciadaRelacao(json_tabelas, tabela)
+            tabelas_referenciadas = obterTabelaReferenciadaRelacao(estruturas_tabelas, tabela)
             grau_tabs_relacionadas = obterAninhamentoTabelas(tabelas_referenciadas)
             grau_relacionamento = tabela["aninhamento"] + grau_tabs_relacionadas
             json_fk = {
