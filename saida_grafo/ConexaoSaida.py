@@ -5,7 +5,7 @@ from utils.Geral import medir_tempo
 # URL do seu Neo4j (pode ser localhost se você tiver rodando localmente)
 uri = "bolt://localhost:7687"  # ou "neo4j://localhost:7687" dependendo da sua configuração
 usuario = "teste"  # Seu nome de usuário
-senha = "senha7355608"  # Sua senha
+senha = "senha"  # Sua senha
 
 # NEO4J_URI="neo4j+s://592b9e03.databases.neo4j.io"
 # NEO4J_USERNAME="neo4j"
