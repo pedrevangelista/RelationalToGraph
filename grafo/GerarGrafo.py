@@ -1,20 +1,4 @@
-import decimal
-from datetime import date, datetime
-
-from utils.Geral import medir_tempo
-
-def tratar_valor(v):
-    if isinstance(v, decimal.Decimal):
-        return float(v)
-    if isinstance(v, bytes):
-        return v.hex()
-    if v is None:
-        return "None"
-    if isinstance(v, str):
-        return v.replace("'", "\\'")
-    if isinstance(v, (date, datetime)):
-        return v.isoformat()
-    return v
+from utils.Geral import medir_tempo, tratar_valor
 
 @medir_tempo
 def gerar_grafo(estruturas, parametros_aninhados):

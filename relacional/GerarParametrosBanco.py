@@ -1,6 +1,5 @@
 # Função para ir ao banco e pegar os dados
 from utils.Geral import formatar_coluna, medir_tempo
-from collections import defaultdict
 
 def get_valores_banco(nome_tabela, esquema, colunas, conn):
     cursor = conn.cursor()
@@ -24,23 +23,6 @@ def get_valores_banco(nome_tabela, esquema, colunas, conn):
     
     return parametros
 
-# Função para gerar os parâmetros JSON
-def gerar_parametros_json(tabelas, conn):
-    parametros_por_tabela = []
-    for tabela in tabelas:
-        nome_tabela = tabela["nome_tabela"]
-        esquema = tabela["esquema"]
-        colunas = tabela["colunas"]
-        
-        # Obter os valores reais do banco para essa tabela
-        parametros = get_valores_banco(nome_tabela, esquema, colunas, conn)
-        parametros_por_tabela.append({
-            "tabela": nome_tabela,
-            "esquema": esquema,
-            "parametros": parametros
-        })
-    return parametros_por_tabela
-
 @medir_tempo
 def gerar_parametros_aninhados(tabelas, conn):
     # Primeiro, pegar os dados de todas as tabelas
@@ -52,20 +34,17 @@ def gerar_parametros_aninhados(tabelas, conn):
         chave = (tabela["esquema"], tabela["nome_tabela"])
         lookup_tabelas[chave] = tabela
 
-    quantia = 0
     # Coletar dados do banco para todas as tabelas
     for tabela in tabelas:
         nome_tabela = tabela["nome_tabela"]
         esquema = tabela["esquema"]
         colunas = tabela["colunas"]
         parametros = get_valores_banco(nome_tabela, esquema, colunas, conn)
-        quantia += len(parametros)
         dados_por_tabela[(esquema, nome_tabela)] = {
             "dados": parametros,
             "tabela": tabela
         }
 
-    print(quantia)
     # Construir o aninhamento
     # Passo 1: Identificar tabelas para aninhar (aninhamento == 1)
     tabelas_para_aninhar = [

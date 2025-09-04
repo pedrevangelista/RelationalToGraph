@@ -4,39 +4,12 @@ from decimal import Decimal
 import json
 import os
 
-def gerar_output(nome_banco, json_tabelas, cypher, relaciomentos_cypher, valores_banco_cypher):
-
-
-    tabelas_info = json.dumps(json_tabelas, indent=4)
-
-    arquivo = abrir_arquivo_saida(nome_banco, 'tabelas_infos.json', "w")
-    arquivo.write(tabelas_info)
-    arquivo.close()
-
-    cypher_json = json.dumps(cypher, indent=4)
-
-    arquivo = abrir_arquivo_saida(nome_banco, 'cypher.json', "w")
-    arquivo.write(cypher_json)
-    arquivo.close()
-
-    relaciomentos_cypher_json = json.dumps(relaciomentos_cypher, indent=4)
-
-    arquivo = abrir_arquivo_saida(nome_banco, 'relaciomentos_cypher_json.json', "w")
-    arquivo.write(relaciomentos_cypher_json)
-    arquivo.close()
-
 def gerar_output_json(nome_banco, result, file_name):
 
     result_json = json.dumps(result, default=data_converter, indent=4)
 
     arquivo = abrir_arquivo_saida(nome_banco, file_name, "w")
     arquivo.write(result_json)
-    arquivo.close()
-
-def gerar_output(nome_banco, result, file_name):
-
-    arquivo = abrir_arquivo_saida(nome_banco, file_name, "w")
-    arquivo.write(result)
     arquivo.close()
 
     
